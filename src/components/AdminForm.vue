@@ -1,5 +1,10 @@
 <template>
   <div class="page-container">
+    <!-- Snackbar for Notifications -->
+    <v-snackbar v-model="snackbar" :timeout="timeout" location="top">
+      {{ text }}
+    </v-snackbar>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
       <!-- Title on the left -->
@@ -18,12 +23,12 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Collapsible menu -->
+      <!-- Buttons on the right -->
       <div class="collapse navbar-collapse" id="navbarNav">
         <div class="ms-auto d-flex">
           <button class="btn btn-primary me-2" @click="goToHome">Home</button>
-          <button class="btn btn-success me-2" @click="goToTutor">Tutor</button>
-          <button class="btn btn-warning" @click="goToUser">User</button>
+          <button class="btn btn-success me-2" @click="goToUser">User</button>
+          <button class="btn btn-warning" @click="goToTutor">Tutor</button>
         </div>
       </div>
     </nav>
@@ -31,44 +36,123 @@
     <!-- Admin Login Form -->
     <div class="form-container d-flex justify-content-center align-items-center">
       <div class="form-box">
-        <h2 class="text-center mb-4">Admin Login</h2>
-        <form @submit.prevent="handleLogin">
-          <!-- Email Input -->
-          <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              v-model="email"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
+        <!-- Login Form -->
+        <div v-if="!showForgotPassword && !showResetPassword">
+          <h2 class="text-center mb-4">Admin Login</h2>
+          <form @submit.prevent="handleLogin">
+            <!-- Email Input -->
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                v-model="email"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
 
-          <!-- Password Input -->
-          <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input
-              type="password"
-              class="form-control"
-              id="password"
-              v-model="password"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
+            <!-- Password Input with Eye Icon Toggle -->
+            <div class="mb-3 position-relative">
+              <label for="password" class="form-label">Password</label>
+              <input
+                :type="showPassword ? 'text' : 'password'"
+                class="form-control"
+                id="password"
+                v-model="password"
+                placeholder="Enter your password"
+                required
+              />
+              <span
+                class="password-toggle"
+                @click="showPassword = !showPassword"
+                style="position: absolute; right: 10px; top: 35px; cursor: pointer;"
+              >
+                <i :class="showPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></i>
+              </span>
+            </div>
 
-          <!-- Forgot Password Button -->
-          <div class="mb-3 text-end">
-            <button type="button" class="btn btn-link" @click="goToForgotPassword">Forgot Password?</button>
-          </div>
+            <!-- Forgot Password Button -->
+            <div class="mb-3 text-end">
+              <button type="button" class="btn btn-link" @click="showForgotPassword = true">Forgot Password?</button>
+            </div>
 
-          <!-- Login Button -->
-          <div class="text-center">
-            <button type="submit" class="btn btn-primary">Login</button>
-          </div>
-        </form>
+            <!-- Login Button -->
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Forgot Password Form -->
+        <div v-if="showForgotPassword && !showResetPassword">
+          <h2 class="text-center mb-4">Forgot Password</h2>
+          <form @submit.prevent="handleForgotPasswordRequest">
+            <!-- Email Input -->
+            <div class="mb-3">
+              <label for="forgotEmail" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="forgotEmail"
+                v-model="email"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <!-- New Password Input -->
+            <div class="mb-3 position-relative">
+              <label for="newPassword" class="form-label">New Password</label>
+              <input
+                :type="showNewPassword ? 'text' : 'password'"
+                class="form-control"
+                id="newPassword"
+                v-model="newPassword"
+                placeholder="Enter new password"
+                required
+              />
+              <span
+                class="password-toggle"
+                @click="showNewPassword = !showNewPassword"
+                style="position: absolute; right: 10px; top: 35px; cursor: pointer;"
+              >
+                <i :class="showNewPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></i>
+              </span>
+            </div>
+
+            <!-- Confirm Password Input -->
+            <div class="mb-3 position-relative">
+              <label for="confirmPassword" class="form-label">Confirm Password</label>
+              <input
+                :type="showConfirmPassword ? 'text' : 'password'"
+                class="form-control"
+                id="confirmPassword"
+                v-model="confirmPassword"
+                placeholder="Confirm new password"
+                required
+              />
+              <span
+                class="password-toggle"
+                @click="showConfirmPassword = !showConfirmPassword"
+                style="position: absolute; right: 10px; top: 35px; cursor: pointer;"
+              >
+                <i :class="showConfirmPassword ? 'mdi mdi-eye-off' : 'mdi mdi-eye'"></i>
+              </span>
+            </div>
+
+            <!-- Reset Password Button -->
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">Reset Password</button>
+            </div>
+
+            <!-- Back to Login Button -->
+            <div class="text-center mt-3">
+              <button type="button" class="btn btn-link" @click="showForgotPassword = false">Back to Login</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -87,149 +171,93 @@ export default {
     return {
       email: '',
       password: '',
+      newPassword: '',
+      confirmPassword: '',
       snackbar: false,
       text: '',
       timeout: 2000,
+      showPassword: false, // Toggle password visibility
+      showNewPassword: false, // Toggle new password visibility
+      showConfirmPassword: false, // Toggle confirm password visibility
+      showForgotPassword: false, // Toggle between login and forgot password forms
+      showResetPassword: false, // Toggle between forgot password and reset password forms
     };
   },
   methods: {
-    // Navigate to Home Page
     goToHome() {
       this.$router.push('/');
     },
-
-    // Navigate to Tutor Page
-    goToTutor() {
-      this.$router.push('/tutor');
-    },
-
-    // Navigate to User Page
     goToUser() {
       this.$router.push('/user');
     },
-
-    // Navigate to Forgot Password Page
-    goToForgotPassword() {
-      this.$router.push('/forgot-password');
+    goToTutor() {
+      this.$router.push('/tutor');
     },
-
-    // Handle Login Form Submission
     async handleLogin() {
-      // if (this.email && this.password) {
-      //   alert(`Logged in as Admin with email: ${this.email}`);
-      //   // You can add API calls or further logic here
-      // } else {
-      //   alert('Please fill in all fields');
       const payload = {
-        "email" :this.email,
-        "password": this.password
-      }
+        email: this.email,
+        password: this.password,
+      };
       try {
-        const res = await this.$store.dispatch("admin/adminlogin",payload)
-        if(res){
-          // alert("successfully login");
-          // this.text = "successfully login";
+        const res = await this.$store.dispatch('admin/login', payload);
+        if (res) {
+          this.text = 'Successfully logged in';
           // this.snackbar = true;
-          this.$router.push('/home');
-        }else {
-          console.log('error');
+          this.$router.push('/admindashboard');
+        } else {
+          this.text = 'Login failed';
+          this.snackbar = true;
         }
-      }catch(error){
-        alert("something went wrong");
+      } catch (error) {
+        this.text = 'Something went wrong';
+        this.snackbar = true;
         console.error(error);
-      
       }
+    },
+    handleForgotPasswordRequest() {
+      this.showForgotPassword = false;
+      this.showResetPassword = true;
+      alert('Proceed to reset password.');
     },
   },
 };
 </script>
 
 <style scoped>
-/* Custom styles for the Admin Page */
-
-/* Page container to fill the screen */
 .page-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ensure the container takes at least the full viewport height */
+  justify-content: space-between;
+  height: 100vh;
 }
 
-/* Navbar styling */
-.navbar {
-  padding: 1rem 0; /* Add padding to the navbar */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
-}
-
-.navbar-brand {
-  font-size: 1.5rem; /* Increase font size for the title */
-  font-weight: bold; /* Make the title bold */
-  color: #2c3e50 !important; /* Change title color */
-}
-
-/* Button styling */
-.btn {
-  font-weight: bold; /* Make buttons bold */
-  padding: 0.5rem 1.5rem; /* Add padding to buttons */
-  border-radius: 25px; /* Rounded corners for buttons */
-}
-
-.btn-primary {
-  background-color: #3498db; /* Custom primary button color */
-  border: none; /* Remove default border */
-}
-
-.btn-success {
-  background-color: #2ecc71; /* Custom success button color */
-  border: none; /* Remove default border */
-}
-
-.btn-warning {
-  background-color: #f1c40f; /* Custom warning button color */
-  border: none; /* Remove default border */
-}
-
-/* Form container styling */
 .form-container {
-  flex: 1; /* Allow the form to grow and fill the remaining space */
-  display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  background-color: #f8f9fa; /* Light background color */
+  flex-grow: 1;
 }
 
 .form-box {
   width: 100%;
-  max-width: 400px; /* Limit form width */
-  padding: 2rem;
-  background-color: #fff; /* White background for the form */
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
 }
 
-.form-box h2 {
-  font-size: 2rem; /* Increase font size for the heading */
-  font-weight: bold; /* Make the heading bold */
-  color: #2c3e50; /* Change heading color */
+.password-toggle {
+  cursor: pointer;
 }
 
-.form-box .form-control {
-  border-radius: 25px; /* Rounded corners for input fields */
-  padding: 0.75rem 1rem; /* Add padding to input fields */
+.btn-blue {
+  background-color: #4285f4;
+  color: white;
 }
 
-.form-box .btn-link {
-  color: #3498db; /* Custom link color */
-  text-decoration: none; /* Remove underline */
+.btn-blue:hover {
+  background-color: #357ae8;
 }
 
-.form-box .btn-link:hover {
-  text-decoration: underline; /* Add underline on hover */
-}
-
-/* Footer styling */
 .footer {
-  background-color: #f8f9fa; /* Light background color */
-  padding: 1rem 0; /* Add padding to the footer */
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow at the top */
+  background-color: #f8f9fa;
 }
 </style>
