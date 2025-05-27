@@ -15,10 +15,11 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <a class="nav-link" href="#home">
-                <i class="fas fa-home me-1"></i>Home
-              </a>
-            </li>
+              <router-link class="nav-link" to="/">
+               <i class="fas fa-home me-1"></i> Home
+              </router-link>
+              </li>
+
             <li class="nav-item">
               <a class="nav-link" href="#goals">
                 <i class="fas fa-bullseye me-1"></i>Goals
@@ -58,7 +59,7 @@
           </div>
           <div class="col-lg-6">
             <div class="hero-image">
-              <img src="@/assets/hero-image.png" alt="Education" class="img-fluid">
+              <!-- <img src="@/assets/hero-image.png" alt="Education" class="img-fluid"> -->
             </div>
           </div>
         </div>
@@ -214,36 +215,13 @@
   </div>
 </template>
 <script>
+import axios from 'axios';
+
 export default {
   name: "UserAction",
   data() {
     return {
-      tutors: [
-        {
-          id: 1,
-          name: "Dr. Sarah Johnson",
-          specialty: "Mathematics Expert",
-          experience: 8,
-          rating: 4.9,
-          // image: require("@/assets/tutor1.jpg")
-        },
-        {
-          id: 2,
-          name: "Prof. Michael Chen",
-          specialty: "Physics Specialist",
-          experience: 12,
-          rating: 4.8,
-          // image: require("@/assets/tutor2.jpg")
-        },
-        {
-          id: 3,
-          name: "Dr. Emily Brown",
-          specialty: "Chemistry Expert",
-          experience: 10,
-          rating: 4.9,
-          // image: require("@/assets/tutor3.jpg")
-        }
-      ],
+      tutors: [],
       reviews: [
         {
           id: 1,
@@ -251,7 +229,7 @@ export default {
           course: "Advanced Mathematics",
           rating: 5,
           text: "Excellent learning experience! The tutors are highly qualified and supportive.",
-          // image: require("@/assets/student1.j/
+          image: "https://via.placeholder.com/50"
         },
         {
           id: 2,
@@ -259,43 +237,49 @@ export default {
           course: "Physics",
           rating: 5,
           text: "Great platform for learning. The tutors are very knowledgeable and patient.",
-          // image: require("@/assets/student2.jpg")
-        },
-        {
-          id: 3,
-          name: "David Lee",
-          course: "Chemistry",
-          rating: 4,
-          text: "Very helpful tutors and well-structured courses. Highly recommended!",
-          // image: require("@/assets/student3.jpg")
+          image: "https://via.placeholder.com/50"
         }
       ]
     };
   },
   methods: {
+    async fetchTutors() {
+      try {
+        const response = await axios.get('http://localhost:8089/api/tutor/gettutor');
+        // Add placeholder fields like rating, image, experience, specialty for UI display
+        this.tutors = response.data.map(tutor => ({
+          id: tutor.tutor_id,
+          name: tutor.name,
+          email: tutor.email,
+          phone: tutor.phn_no,
+          subjectId: tutor.subjectId,
+          image: 'https://via.placeholder.com/100', // Placeholder image
+          rating: 4.5, // Static for now
+          experience: 3, // Static, replace with real if available
+          specialty: 'Subject Specialist' // Static or lookup using subjectId
+        }));
+      } catch (error) {
+        console.error('Failed to fetch tutors:', error);
+      }
+    },
     goBack() {
       this.$router.go(-1);
     },
-    selectGoal(goal) {
-      console.log('Selected goal:', goal);
-      document.getElementById('tutors').scrollIntoView({ behavior: 'smooth' });
-    },
     bookTutor(tutorId) {
-      console.log('Booking tutor:', tutorId);
-      const tutor = this.tutors.find(t => t.id === tutorId);
-      if (tutor) {
-        document.getElementById('payment').scrollIntoView({ behavior: 'smooth' });
-      }
+      alert(`Booking tutor with ID: ${tutorId}`);
     },
-    selectPackage(packageType) {
-      console.log('Selected package:', packageType);
-      alert(`Thank you for selecting the ${packageType} package! We'll contact you shortly.`);
+    selectGoal(goal) {
+      console.log('Goal selected:', goal);
+    },
+    selectPackage(pkg) {
+      console.log('Package selected:', pkg);
     }
+  },
+  mounted() {
+    this.fetchTutors();
   }
 };
 </script>
-
-
 
 
 <style scoped>

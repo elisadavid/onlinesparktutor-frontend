@@ -93,6 +93,60 @@
           </div>
         </div>
 
+          <!-- Subject and Stream Selection Section -->
+          <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="streamId" class="form-label font-weight-bold">Stream</label>
+            <select v-model="streamId" class="form-control custom-select" required @change="fetchSubjectsByStream">
+              <option value="">Select a stream</option>
+              <option v-for="stream in streams" :key="stream.streamId" :value="stream.streamId">
+                {{ stream.streamName }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label class="form-label font-weight-bold">Subjects</label>
+            <div v-if="loading" class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <div v-else-if="subjects.length > 0" class="subject-grid">
+              <!-- <div v-for="subject in subjects" :key="subject.subjectId" class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  :id="'subject-' + subject.subjectId"
+                  :value="subject.subjectId"
+                  v-model="subjectIds"
+                />
+                <label class="form-check-label" :for="'subject-' + subject.subjectId">
+                  {{ subject.subjectName }}
+                </label>
+              </div> -->
+              <div v-for="subject in subjects" :key="subject.subjectId" class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  :id="'subject-' + subject.subjectId"
+                  :value="subject.subjectId"
+                  v-model="subjectId"
+                />
+                <label class="form-check-label" :for="'subject-' + subject.subjectId">
+                  {{ subject.subjectName }}
+                </label>
+              </div>
+
+            </div>
+            <div v-else class="text-muted">
+              Please select a stream to view available subjects
+            </div>
+          </div>
+        </div>
+      </div>
         <!-- Location and Specific Goals -->
         <div class="row mb-3">
           <div class="col">
@@ -131,6 +185,11 @@ export default {
       location: "",
       password: "",
       specificGoals: "",
+      subjects: [],
+      streams: [],
+      subjectIds: [],
+      subjectId: '',
+      streamId: '',
       educationLevel: [],
       teachingMode: [],
       weekId: [],
@@ -168,6 +227,37 @@ export default {
         this.snackbar = true;
       }
     },
+
+
+    async fetchStreams() {
+      try {
+        const response = await fetch('http://localhost:8089/api/admin/get/stream')
+        if (!response.ok) throw new Error('Failed to fetch streams')
+        this.streams = await response.json()
+      } catch (error) {
+        console.error('Error fetching streams:', error)
+      }
+    },
+    async fetchSubjectsByStream() {
+      this.subjects = [] 
+      this.subjectIds = []
+      
+      if (!this.streamId) return
+
+      this.loading = false
+      try {
+        const response = await fetch(`http://localhost:8089/api/admin/getStreamSubjectDetails?streamId=${this.streamId}`)
+        if (!response.ok) throw new Error('Failed to fetch subjects')
+        const newsubjects = await response.json()
+        this.subjects.push(...newsubjects);
+      } catch (error) {
+        console.error('Error fetching subjects for stream:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+
     async submitForm() {
       const payload = {
         username: this.name,
@@ -178,6 +268,8 @@ export default {
         teachingModeId: this.teachingMode,
         weekId: this.weekId,
         location: this.location,
+        subjectId: this.subjectId,
+        streamId: this.streamId,
         specificGoalId: this.specificGoals,
       };
 
@@ -203,6 +295,7 @@ export default {
   },
   mounted() {
     this.fetchDropdownData(); // Fetch dropdown data when component is mounted
+    this.fetchStreams();
   },
 };
 </script>

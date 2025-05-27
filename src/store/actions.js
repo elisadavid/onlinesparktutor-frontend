@@ -27,6 +27,23 @@ export default {
       return false;        // Return false in case of error
     }
   },
+  async tutorlogin({ commit, rootGetters }, payload) {
+    try {
+      const res = await axios.post(`${rootGetters.getUrl}/api/tutor/tutor_login`, payload);
+      if (res.status >= 200 && res.status < 300) {
+        const tutorId = res.data.tutor_id; // ✅ extract ID
+        commit('settutorId', tutorId);
+        return tutorId; // ✅ return tutorId directly
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      return null;
+    }
+  }
+  
+  ,
   async registerStore({rootGetters},payload){
     const response = await axios.post(`${rootGetters.getUrl}/api/tutor/tutor_reg`,payload,{ headers: { "Content-Type": "multipart/form-data" }});
     if(response.status>=200 && response.status<300){

@@ -33,6 +33,18 @@
       <!-- My Users Section -->
       <section v-if="currentView === 'users'" class="users-section">
         <h3>Manage Users</h3>
+
+        <v-select
+          v-model="streamId"
+          :items="viewStreamlist"
+          item-title="streamName"
+          item-value="streamId"
+          label="Stream"
+          @update:model-value="onStreamSelect"
+          required
+        ></v-select>
+
+
         <table class="table" v-if="users.length">
           <thead>
             <tr>
@@ -45,7 +57,7 @@
           <tbody>
             <tr v-for="user in users" :key="user.userId">
               <td>{{ user.userId }}</td>
-              <td>{{ user.name }}</td>
+              <td>{{ user.username }}</td>
               <td>{{ user.email }}</td>
               <td>
                 <button @click="viewUser(user.userId)">View</button>
@@ -126,9 +138,11 @@ export default {
       users: [],
       courses: [],
       schedules: [],
+      viewStreamlist:[],
     };
   },
   methods: {
+
     async fetchProfile() {
       try {
         const res = await axios.get(`http://localhost:8089/api/tutor/tutor/profile/${this.tutorId}`);
@@ -139,6 +153,36 @@ export default {
         console.error('Error fetching profile:', error);
       }
     },
+    async onStreamSelect(selectedStreamId) {
+      this.streamId = selectedStreamId;
+      await this.fetchUsers();
+    },
+    async fetchUsers() {
+      try {
+//         // const res = await axios.get(`http://localhost:8089/api/tutor/tutor/profile/${this.tutorId}`);
+        const users = await axios.get("http://localhost:8089/api/User/users/stream", {
+  params: { streamId: this.streamId,tutorId: this.tutorId }
+});
+        
+        if (users.status >= 200 && users.status < 300) {
+          this.users = users.data;
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    },
+logSelectedStream(streamId){
+  console.log("Selected Stream ID:", streamId);
+},
+     async fetchStream(){
+       try{const response=await axios.get("http://localhost:8089/api/admin/get/stream");
+        this.viewStreamlist=response.data;
+        console.log("stream,",response.data);
+       }
+       catch(error)
+       {console.error("errorfetching",error);}
+     },
+
     async fetchCourses() {
   try {
     const response = await axios.get(`http://localhost:8089/api/tutor/getStreamSubDetailsByTutor/${this.tutorId}`);
@@ -199,6 +243,7 @@ export default {
     this.fetchProfile();
     this.fetchCourses();
     this.fetchSchedules();
+    this.fetchStream();
   }
 };
 </script>

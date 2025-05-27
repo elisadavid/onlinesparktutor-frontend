@@ -18,9 +18,13 @@ const store=createStore({
 state(){
     return{
         base_url:'http://localhost:8089',
+
+        auth:{
+            tutorId:sessionStorage.getItem("tutorId")||"",
+        }
     
     };
-
+ 
 },
 mutations:rootMutations,
 actions:rootActions,

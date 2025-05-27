@@ -13,12 +13,14 @@
           <!-- <search-subject></search-subject> -->
            <!-- <sign-up></sign-up> -->
             <!-- <stream-selection></stream-selection> -->
+             <!-- <user-action></user-action> -->
        <router-view></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
+// import UserAction from './components/UserAction.vue'
 // import StreamSelection from './components/StreamSelection.vue'
 // import SignUp from './components/SignUp.vue'
 // import SearchSubject from './components/SearchSubject.vue'
@@ -38,6 +40,7 @@ export default {
   name: 'App',
 
   components: {
+    // UserAction
     // StreamSelection
     // SignUp
     // SearchSubject

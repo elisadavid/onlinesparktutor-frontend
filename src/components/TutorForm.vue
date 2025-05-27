@@ -211,26 +211,31 @@ export default {
 
     // Handle Login Form Submission
     async handleLogin() {
-      const payload = {
-        email: this.email,
-        password: this.password,
-      };
-      try {
-        const res = await this.$store.dispatch('tutor/login', payload);
-        if (res) {
-          this.text = 'Successfully logged in';
-          this.snackbar = true;
-          this.$router.push({ path: '/tutoraction', query: { tutorId: res.data.tutor_id } });
-        } else {
-          this.text = 'Login failed';
-          this.snackbar = true;
-        }
-      } catch (error) {
-        this.text = 'Something went wrong';
-        this.snackbar = true;
-        console.error(error);
-      }
-    },
+  const payload = {
+    email: this.email,
+    password: this.password,
+  };
+  try {
+    const tutorId = await this.$store.dispatch("tutorlogin", payload);
+    if (tutorId) {
+      // ✅ tutorId is directly available
+      sessionStorage.setItem("tutorId", tutorId);
+      this.text = 'Successfully logged in';
+      this.snackbar = true;
+      this.$router.push({ path: '/tutoraction', query: { tutorId } });
+    } else {
+      this.text = 'Login failed';
+      this.snackbar = true;
+    }
+  } catch (error) {
+    this.text = 'Something went wrong';
+    this.snackbar = true;
+    console.error(error);
+  }
+}
+
+
+,
 
     // Handle Forgot Password Request (Step 1)
     handleForgotPasswordRequest() {

@@ -1,223 +1,124 @@
 <template>
-  <!-- Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 px-4 shadow-sm">
-    <a class="navbar-brand font-weight-bold text-dark" href="#">SPARK TUTORIAL</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <router-link class="nav-link text-dark" to="/">Home</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-dark" to="/about">About Us</router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-dark" to="/contact">Contact</router-link>
-        </li>
-      </ul>
-    </div>
-  </nav>
+  <div class="registration-page">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <a class="navbar-brand" href="#">SPARK TUTORIAL</a>
+      <button class="navbar-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggle-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="nav-links">
+          <li><router-link to="/">Home</router-link></li>
+          <li><router-link to="/about">About Us</router-link></li>
+          <li><router-link to="/contact">Contact</router-link></li>
+        </ul>
+      </div>
+    </nav>
 
-  <!-- Tutor Registration Form -->
-  <div class="container mt-5">
-    <h1 class="text-center mb-4 font-weight-bold text-dark">Tutor Registration</h1>
-    <form @submit.prevent="submitDetails" class="p-5 bg-white rounded-lg shadow-lg">
-      <!-- Subject and Stream Selection Section -->
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="streamId" class="form-label font-weight-bold">Stream</label>
-            <select v-model="streamId" class="form-control custom-select" required @change="fetchSubjectsByStream">
+    <!-- Registration Form -->
+    <div class="registration-container">
+      <h1 class="registration-title">Tutor Registration</h1>
+      <form @submit.prevent="submitDetails" class="registration-form">
+        <!-- Stream and Subject Selection -->
+        <div class="form-grid">
+          <div class="form-section">
+            <label for="streamId">Stream</label>
+            <select v-model="streamId" @change="fetchSubjectsByStream" required>
               <option value="">Select a stream</option>
               <option v-for="stream in streams" :key="stream.streamId" :value="stream.streamId">
                 {{ stream.streamName }}
               </option>
             </select>
           </div>
-        </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <label class="form-label font-weight-bold">Subjects</label>
-            <div v-if="loading" class="text-center">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+
+          <div class="form-section">
+            <label>Subjects</label>
+            <div v-if="loading" class="loader">
+              <div class="spinner"></div>
+            </div>
+            <div v-else-if="subjects.length > 0" class="subject-options">
+              <div v-for="subject in subjects" :key="subject.subjectId" class="subject-option">
+                <input type="radio" :id="'subject-' + subject.subjectId" :value="subject.subjectId" v-model="subjectId">
+                <label :for="'subject-' + subject.subjectId">{{ subject.subjectName }}</label>
               </div>
             </div>
-            <div v-else-if="subjects.length > 0" class="subject-grid">
-              <!-- <div v-for="subject in subjects" :key="subject.subjectId" class="form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  :id="'subject-' + subject.subjectId"
-                  :value="subject.subjectId"
-                  v-model="subjectIds"
-                />
-                <label class="form-check-label" :for="'subject-' + subject.subjectId">
-                  {{ subject.subjectName }}
-                </label>
-              </div> -->
-              <div v-for="subject in subjects" :key="subject.subjectId" class="form-check">
-                <input
-                  type="radio"
-                  class="form-check-input"
-                  :id="'subject-' + subject.subjectId"
-                  :value="subject.subjectId"
-                  v-model="subjectId"
-                />
-                <label class="form-check-label" :for="'subject-' + subject.subjectId">
-                  {{ subject.subjectName }}
-                </label>
+            <div v-else class="empty-state">Please select a stream to view subjects</div>
+          </div>
+        </div>
+
+        <!-- Time Slots -->
+        <div class="time-slots">
+          <div class="time-slot">
+            <h3>Morning Session</h3>
+            <div class="time-inputs">
+              <div class="time-input">
+                <label for="morningStartTime">Start Time</label>
+                <input type="time" id="morningStartTime" v-model="morningStartTime" required>
               </div>
-
+              <div class="time-input">
+                <label for="morningEndTime">End Time</label>
+                <input type="time" id="morningEndTime" v-model="morningEndTime" required>
+              </div>
             </div>
-            <div v-else class="text-muted">
-              Please select a stream to view available subjects
+          </div>
+
+          <div class="time-slot">
+            <h3>Evening Session</h3>
+            <div class="time-inputs">
+              <div class="time-input">
+                <label for="eveningStartTime">Start Time</label>
+                <input type="time" id="eveningStartTime" v-model="eveningStartTime" required>
+              </div>
+              <div class="time-input">
+                <label for="eveningEndTime">End Time</label>
+                <input type="time" id="eveningEndTime" v-model="eveningEndTime" required>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Morning Session Time Section -->
-      <div class="row mb-4">
-        <h4 class="mb-3">Morning Session</h4>
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="morningStartTime" class="form-label">Start Time</label>
-            <input
-              type="time"
-              id="morningStartTime"
-              v-model="morningStartTime"
-              class="form-control"
-              required
-            />
+        <!-- Rates Section -->
+        <div class="rates-section">
+          <h3>Rate Settings</h3>
+          <div class="rates-grid">
+            <div class="rate-input">
+              <label for="weekdayRate">Weekday Rate (per hour)</label>
+              <input type="number" id="weekdayRate" v-model="weekdayRate" min="0" step="0.01" required>
+            </div>
+            <div class="rate-input">
+              <label for="weekendRate">Weekend Rate (per hour)</label>
+              <input type="number" id="weekendRate" v-model="weekendRate" min="0" step="0.01" required>
+            </div>
+            <div class="rate-input">
+              <label for="extraHourlyRate">Extra Hour Rate</label>
+              <input type="number" id="extraHourlyRate" v-model="extraHourlyRate" min="0" step="0.01" required>
+            </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="morningEndTime" class="form-label">End Time</label>
-            <input
-              type="time"
-              id="morningEndTime"
-              v-model="morningEndTime"
-              class="form-control"
-              required
-            />
-          </div>
-        </div>
-      </div>
 
-      <!-- Evening Session Time Section -->
-      <div class="row mb-4">
-        <h4 class="mb-3">Evening Session</h4>
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="eveningStartTime" class="form-label">Start Time</label>
-            <input
-              type="time"
-              id="eveningStartTime"
-              v-model="eveningStartTime"
-              class="form-control"
-              required
-            />
+        <!-- Available Days -->
+        <div class="days-section">
+          <h3>Available Days</h3>
+          <div class="days-grid">
+            <div v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" 
+                 :key="day" 
+                 class="day-option">
+              <input type="checkbox" :id="day.toLowerCase()" :value="day" v-model="availableDays">
+              <label :for="day.toLowerCase()">{{ day }}</label>
+            </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="eveningEndTime" class="form-label">End Time</label>
-            <input
-              type="time"
-              id="eveningEndTime"
-              v-model="eveningEndTime"
-              class="form-control"
-              required
-            />
-          </div>
-        </div>
-      </div>
 
-      <!-- Rate Settings Section -->
-      <div class="row mb-4">
-        <h4 class="mb-3">Rate Settings</h4>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="weekdayRate" class="form-label">Weekday Rate (per hour)</label>
-            <input
-              type="number"
-              id="weekdayRate"
-              v-model="weekdayRate"
-              class="form-control"
-              min="0"
-              step="0.01"
-              required
-            />
-          </div>
+        <!-- Experience -->
+        <div class="experience-section">
+          <label for="experience">Experience</label>
+          <input type="text" id="experience" v-model="experience" required>
         </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="weekendRate" class="form-label">Weekend Rate (per hour)</label>
-            <input
-              type="number"
-              id="weekendRate"
-              v-model="weekendRate"
-              class="form-control"
-              min="0"
-              step="0.01"
-              required
-            />
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="extraHourlyRate" class="form-label">Extra Hour Rate</label>
-            <input
-              type="number"
-              id="extraHourlyRate"
-              v-model="extraHourlyRate"
-              class="form-control"
-              min="0"
-              step="0.01"
-              required
-            />
-          </div>
-        </div>
-      </div>
 
-      <!-- Available Days Section -->
-      <div class="form-group mb-4">
-        <label class="form-label font-weight-bold d-block">Available Days</label>
-        <div class="d-flex flex-wrap gap-3">
-          <div v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']" 
-               :key="day" 
-               class="form-check">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              :id="day.toLowerCase()"
-              :value="day"
-              v-model="availableDays"
-            />
-            <label class="form-check-label" :for="day.toLowerCase()">{{ day }}</label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Submit Button -->
-      <div class="text-center">
-        <button type="submit" class="btn btn-primary btn-lg px-5">
-          Submit Registration
-        </button>
-      </div>
-    </form>
+        <!-- Submit Button -->
+        <button type="submit" class="submit-button">Complete Registration</button>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -228,6 +129,7 @@ export default {
       subjects: [],
       streams: [],
       subjectIds: [],
+      location:'',
       subjectId: '',
       streamId: '',
       loading: false,
@@ -238,6 +140,10 @@ export default {
       weekdayRate: '',
       weekendRate: '',
       extraHourlyRate: '',
+      subjectName:'',
+      experience:'',
+      rating:'',
+      qualification:'',
       availableDays: [],
       tutorId : this.$route.query.tutorId
     }
@@ -284,9 +190,14 @@ export default {
           ratePerHourWeekend: this.weekendRate,
           extraHourRate: this.extraHourlyRate,
           availableDays: this.availableDays,
+          location: this.location,
           subjectId: this.subjectId,
           streamId: this.streamId,
-          tutorId : this.tutorId
+          tutorId : this.tutorId,
+          experience: this.experience,
+          subjectName:this.subjectName,
+          streamName:this.streamName,
+          rating:this.rating
         }
 
         const response = await fetch('http://localhost:8089/api/tutor/add/availability', {
@@ -315,60 +226,227 @@ export default {
 </script>
 
 <style scoped>
-.subject-grid {
+.registration-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.navbar {
+  background: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #3498db;
+}
+
+.registration-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.registration-title {
+  text-align: center;
+  color: #2c3e50;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.registration-form {
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.form-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+select, input[type="text"], input[type="number"], input[type="time"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+select:focus, input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+  outline: none;
+}
+
+.subject-options {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
 }
 
-.form-check {
-  margin-bottom: 0.5rem;
+.subject-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.gap-3 {
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.time-slot h3 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.time-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.form-control:focus {
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+.rates-section {
+  margin-bottom: 3rem;
 }
 
-.btn-primary {
-  background-color: #4a90e2;
-  border-color: #4a90e2;
+.rates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.days-section {
+  margin-bottom: 3rem;
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.day-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.experience-section {
+  margin-bottom: 3rem;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 1rem;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.btn-primary:hover {
-  background-color: #357abd;
-  border-color: #357abd;
-  transform: translateY(-1px);
+.submit-button:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
 }
 
-h4 {
-  color: #2c3e50;
-  font-weight: 600;
+.loader {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
 }
 
-.form-label {
-  color: #34495e;
-  font-weight: 500;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.spinner-border {
-  width: 1.5rem;
-  height: 1.5rem;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.text-muted {
-  font-size: 0.9rem;
+.empty-state {
   text-align: center;
+  color: #7f8c8d;
   padding: 1rem;
 }
 
-.shadow-lg {
-  box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+@media (max-width: 768px) {
+  .registration-form {
+    padding: 1.5rem;
+  }
+
+  .time-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .navbar-toggle {
+    display: block;
+  }
+
+  .nav-links.active {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
 }
 </style>
 
