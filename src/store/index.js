@@ -21,6 +21,10 @@ state(){
 
         auth:{
             tutorId:sessionStorage.getItem("tutorId")||"",
+            streamId:sessionStorage.getItem("streamId")||"",
+            userId:sessionStorage.getItem("userId")||"",
+           
+
         }
     
     };

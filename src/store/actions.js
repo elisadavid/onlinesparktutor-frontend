@@ -12,12 +12,17 @@
 import axios from "axios";
 
 export default {
-  async login({ rootGetters }, payload) {
+  async login({ commit,rootGetters }, payload) {
     try {
       const res = await axios.post(`${rootGetters.getUrl}/api/User/login`, payload);
       // Check if the response status is in the 2xx range
       if (res.status >= 200 && res.status < 300) {
         console.log(res);  // Successfully logged in, response logged
+        commit('setstreamId',res.data.streamId);
+        console.log("streamId",res.data.streamId);
+        commit('setuserId',res.data.userId);
+        
+        
         return true;       // Return true to indicate success
       } else {
         return false;      // Return false if login failed (non 2xx status)

@@ -4,65 +4,36 @@
     <v-snackbar v-model="snackbar" :timeout="timeout" location="top">
       {{ text }}
     </v-snackbar>
-    
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
-      <a class="navbar-brand" href="#">SPARK TUTORIAL</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <router-link class="nav-link" to="/">Home</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/about">About Us</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/contact">Contact</router-link>
-          </li>
-        </ul>
-      </div>
-    </nav>
 
     <!-- Registration Form -->
     <div class="register-content">
       <h1 class="text-center mb-4">User Registration</h1>
       <form @submit.prevent="submitForm" class="registration-form">
-        <!-- Name and Email -->
+        <!-- Name, Email, Password -->
         <div class="row mb-3">
           <div class="col">
-            <label for="name" class="form-label">Name</label>
+            <label class="form-label">Name</label>
             <input type="text" class="form-control" v-model="name" required />
           </div>
           <div class="col">
-            <label for="email" class="form-label">Email</label>
+            <label class="form-label">Email</label>
             <input type="email" class="form-control" v-model="email" required />
           </div>
           <div class="col">
-            <label for="password" class="form-label">Password</label>
+            <label class="form-label">Password</label>
             <input type="password" class="form-control" v-model="password" required />
           </div>
         </div>
 
-        <!-- Phone and Level of Education -->
+        <!-- Phone, Education Level -->
         <div class="row mb-3">
           <div class="col">
-            <label for="phone" class="form-label">Phone Number</label>
+            <label class="form-label">Phone Number</label>
             <input type="text" class="form-control" v-model="phone" required />
           </div>
           <div class="col">
-            <label for="levelOfEducation" class="form-label">Level of Education</label>
-            <select class="form-select" v-model="levelOfEducation" required>
+            <label class="form-label">Level of Education</label>
+            <select class="form-select" v-model="levelOfEducation" required @change="fetchStreams">
               <option value="">Select Level</option>
               <option v-for="option in educationOptions" :key="option.educationLevelId" :value="option.educationLevelId">
                 {{ option.educationLevel }}
@@ -71,10 +42,10 @@
           </div>
         </div>
 
-        <!-- Teaching Mode and Availability -->
+        <!-- Teaching Mode, Availability -->
         <div class="row mb-3">
           <div class="col">
-            <label for="teachingMode" class="form-label">Teaching Mode</label>
+            <label class="form-label">Teaching Mode</label>
             <select class="form-select" v-model="teachingMode" required>
               <option value="">Select Teaching Mode</option>
               <option v-for="option in teachingModeOptions" :key="option.teachingModeId" :value="option.teachingModeId">
@@ -83,7 +54,7 @@
             </select>
           </div>
           <div class="col">
-            <label for="weekId" class="form-label">Availability</label>
+            <label class="form-label">Availability</label>
             <select class="form-select" v-model="weekId" required>
               <option value="">Select Availability</option>
               <option v-for="option in availabilityOptions" :key="option.weekId" :value="option.weekId">
@@ -93,70 +64,47 @@
           </div>
         </div>
 
-          <!-- Subject and Stream Selection Section -->
-          <div class="row mb-4">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="streamId" class="form-label font-weight-bold">Stream</label>
-            <select v-model="streamId" class="form-control custom-select" required @change="fetchSubjectsByStream">
+        <!-- Stream and Subject Selection -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <label class="form-label">Stream</label>
+            <select class="form-control" v-model="streamId" required @change="fetchSubjectsByStream">
               <option value="">Select a stream</option>
               <option v-for="stream in streams" :key="stream.streamId" :value="stream.streamId">
                 {{ stream.streamName }}
               </option>
             </select>
           </div>
-        </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <label class="form-label font-weight-bold">Subjects</label>
+
+          <div class="col-md-6">
+            <label class="form-label">Subjects</label>
             <div v-if="loading" class="text-center">
               <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
             </div>
             <div v-else-if="subjects.length > 0" class="subject-grid">
-              <!-- <div v-for="subject in subjects" :key="subject.subjectId" class="form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  :id="'subject-' + subject.subjectId"
-                  :value="subject.subjectId"
-                  v-model="subjectIds"
-                />
-                <label class="form-check-label" :for="'subject-' + subject.subjectId">
-                  {{ subject.subjectName }}
-                </label>
-              </div> -->
               <div v-for="subject in subjects" :key="subject.subjectId" class="form-check">
-                <input
-                  type="radio"
-                  class="form-check-input"
-                  :id="'subject-' + subject.subjectId"
-                  :value="subject.subjectId"
-                  v-model="subjectId"
-                />
+                <input type="radio" class="form-check-input" :id="'subject-' + subject.subjectId" :value="subject.subjectId" v-model="subjectId" />
                 <label class="form-check-label" :for="'subject-' + subject.subjectId">
                   {{ subject.subjectName }}
                 </label>
               </div>
-
             </div>
-            <div v-else class="text-muted">
-              Please select a stream to view available subjects
-            </div>
+            <div v-else class="text-muted">Please select a stream to view available subjects</div>
           </div>
         </div>
-      </div>
-        <!-- Location and Specific Goals -->
+
+        <!-- Location and Goals -->
         <div class="row mb-3">
           <div class="col">
-            <label for="location" class="form-label">Location</label>
+            <label class="form-label">Location</label>
             <input type="text" class="form-control" v-model="location" required />
           </div>
           <div class="col">
-            <label for="specificGoals" class="form-label">Specific Goals</label>
+            <label class="form-label">Specific Goals</label>
             <select class="form-select" v-model="specificGoals" required>
-              <option value="">Select Specific Goals</option>
+              <option value="">Select Specific Goal</option>
               <option v-for="option in goalsOptions" :key="option.specificGoalId" :value="option.specificGoalId">
                 {{ option.specificGoal }}
               </option>
@@ -164,7 +112,7 @@
           </div>
         </div>
 
-        <!-- Submit Button -->
+        <!-- Submit -->
         <div class="text-center">
           <button type="submit" class="btn btn-primary">Register</button>
         </div>
@@ -179,91 +127,102 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      name: "",
-      email: "",
-      phone: "",
-      location: "",
-      password: "",
-      specificGoals: "",
+      name: '',
+      email: '',
+      password: '',
+      phone: '',
+      location: '',
+      levelOfEducation: '',
+      streamId: '',
+      subjectId: '',
+      specificGoals: '',
+      teachingMode: '',
+      weekId: '',
       subjects: [],
       streams: [],
-      subjectIds: [],
-      subjectId: '',
-      streamId: '',
-      educationLevel: [],
-      teachingMode: [],
-      weekId: [],
+      streamName:'',
+      educationOptions: [],
+      teachingModeOptions: [],
+      availabilityOptions: [],
       goalsOptions: [],
+      loading: false,
       snackbar: false,
       timeout: 3000,
-      text: ""
+      text: ''
     };
+  },
+  watch: {
+    levelOfEducation(newVal) {
+      if (newVal) {
+        this.fetchStreams();
+      } else {
+        this.streams = [];
+        this.subjects = [];
+      }
+    }
   },
   methods: {
     async fetchDropdownData() {
       try {
-        // Fetch education levels
-        const educationResponse = await fetch('http://localhost:8089/api/admin/get/education');
-        const educationData = await educationResponse.json();
-        this.educationOptions = educationData;
+        const [education, teaching, week, goals] = await Promise.all([
+          fetch('http://localhost:8089/api/admin/get/education').then(res => res.json()),
+          fetch('http://localhost:8089/api/tutor/teachinglist').then(res => res.json()),
+          fetch('http://localhost:8089/api/tutor/weeklist').then(res => res.json()),
+          fetch('http://localhost:8089/api/User/specificGoal/list').then(res => res.json())
+        ]);
 
-        // Fetch teaching modes
-        const teachingModeResponse = await fetch('http://localhost:8089/api/tutor/teachinglist');
-        const teachingModeData = await teachingModeResponse.json();
-        this.teachingModeOptions = teachingModeData;
-
-        // Fetch week availability
-        const availabilityResponse = await fetch('http://localhost:8089/api/tutor/weeklist');
-        const availabilityData = await availabilityResponse.json();
-        this.availabilityOptions = availabilityData;
-
-        // Fetch specific goals
-        const goalsResponse = await fetch('http://localhost:8089/api/User/specificGoal/list');
-        const goalsData = await goalsResponse.json();
-        this.goalsOptions = goalsData;
+        this.educationOptions = education;
+        this.teachingModeOptions = teaching;
+        this.availabilityOptions = week;
+        this.goalsOptions = goals;
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
-        this.text = 'Error loading form data';
         this.snackbar = true;
+        this.text = "Failed to load form data";
       }
     },
 
+   async fetchStreams() {
+  this.loading = true;
+  try {
+    const response = await fetch(`http://localhost:8089/api/admin/getEducationalStream?educationlevelId=${this.levelOfEducation}`);
+    if (!response.ok) throw new Error('Failed to fetch streams');
+    
+    // const data = await response.json();
 
-    async fetchStreams() {
-      try {
-        const response = await fetch('http://localhost:8089/api/admin/get/stream')
-        if (!response.ok) throw new Error('Failed to fetch streams')
-        this.streams = await response.json()
-      } catch (error) {
-        console.error('Error fetching streams:', error)
-      }
-    },
+    // Optional: you might not even need this filter if the backend filters it already
+    this.streams =await response.json();
+  } catch (error) {
+    console.error("Error fetching streams:", error);
+    this.text = "Failed to load streams";
+    this.snackbar = true;
+  } finally {
+    this.loading = false;
+  }
+},
+
+
     async fetchSubjectsByStream() {
-      this.subjects = [] 
-      this.subjectIds = []
-      
-      if (!this.streamId) return
-
-      this.loading = false
+      this.subjects = [];
+      if (!this.streamId) return;
+      this.loading = true;
       try {
-        const response = await fetch(`http://localhost:8089/api/admin/getStreamSubjectDetails?streamId=${this.streamId}`)
-        if (!response.ok) throw new Error('Failed to fetch subjects')
-        const newsubjects = await response.json()
-        this.subjects.push(...newsubjects);
-      } catch (error) {
-        console.error('Error fetching subjects for stream:', error)
+        const res = await fetch(`http://localhost:8089/api/admin/getStreamSubjectDetails?streamId=${this.streamId}`);
+        if (!res.ok) throw new Error('Failed to fetch subjects');
+        this.subjects = await res.json();
+      } catch (err) {
+        console.error("Error fetching subjects:", err);
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
-
 
     async submitForm() {
       const payload = {
         username: this.name,
         email: this.email,
         phn_no: this.phone,
-        password:this.password,
+        password: this.password,
         educationLevelId: this.levelOfEducation,
         teachingModeId: this.teachingMode,
         weekId: this.weekId,
@@ -271,34 +230,37 @@ export default {
         subjectId: this.subjectId,
         streamId: this.streamId,
         specificGoalId: this.specificGoals,
+        streamName:this.streamName
       };
 
       try {
-  // Make API call to register user
-  const response = await axios.post('http://localhost:8089/api/User/register', payload);
-
-  // Check if the status is 200 (OK)
-  if (response.status === 200) {
-    this.text = 'Registered Successfully';
-    this.snackbar = true;
-    this.$router.push('/useraction');
-  } else {
-    this.text = 'Registration Failed';
-    this.snackbar = true;
-  }
-} catch (error) {
-  this.text = 'Something went wrong';
-  this.snackbar = true;
-  console.error('Error during registration:', error);
-}
-    },
+        const response = await axios.post('http://localhost:8089/api/User/register', payload);
+        if (response.status === 200) {
+          sessionStorage.setItem("streamId", response.data.streamId);
+          this.text = "Registered Successfully";
+          this.snackbar = true;
+          this.$router.push("/user");
+        } else {
+          this.text = "Registration Failed";
+          this.snackbar = true;
+        }
+      } catch (error) {
+        console.error("Error during registration:", error);
+        this.text = "Something went wrong";
+        this.snackbar = true;
+      }
+    }
   },
   mounted() {
-    this.fetchDropdownData(); // Fetch dropdown data when component is mounted
-    this.fetchStreams();
-  },
+    this.fetchDropdownData();
+  console.log("Education level ID:", this.educationlevelId)
+  }
 };
 </script>
+
+
+
+
 
 <style scoped>
 .register-page {

@@ -73,7 +73,7 @@
           <span class="section-badge">LEARNING GOALS</span>
           <h2 class="section-title">Choose Your Learning Path</h2>
         </div>
-        <div class="goals-grid">
+        <a href="#tutors" style="text-decoration: none;"><div class="goals-grid">
           <div class="goal-card" @click="selectGoal('exam')">
             <div class="goal-icon">
               <i class="fas fa-book-reader"></i>
@@ -95,7 +95,7 @@
             <h3>General Learning</h3>
             <p>Flexible learning at your own pace</p>
           </div>
-        </div>
+        </div></a>
       </div>
     </section>
 
@@ -119,8 +119,9 @@
               <h3>{{ tutor.name }}</h3>
               <p class="tutor-specialty">{{ tutor.specialty }}</p>
               <p class="tutor-experience">{{ tutor.experience }} Years Experience</p>
+              <p class="tutor-subject">{{tutor.subjectName}}</p>
             </div>
-            <button class="book-button" @click="bookTutor(tutor.id)">
+            <button class="book-button" @click="openDialog(tutor)">
               Book Session
             </button>
           </div>
@@ -212,6 +213,62 @@
         <p>&copy; 2025 SPARK TUTORIAL. All Rights Reserved.</p>
       </div>
     </footer>
+
+
+     <!-- Book Session Dialog -->
+     <v-dialog v-model="dialog" max-width="500px">
+  <v-card>
+    <v-card-title class="text-h6 font-weight-bold">
+      Booking Session with {{ selectedTutor?.name }}
+    </v-card-title>
+
+    <v-card-text>
+      <v-list dense>
+        <v-list-item>
+          <v-list-item-content>
+            <v-list-item-title>subjectName</v-list-item-title>
+            <v-list-item-subtitle>{{ selectedTutor?.subjectName }}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item>
+          <v-list-item-content>
+            <v-list-item-title>streamName</v-list-item-title>
+            <v-list-item-subtitle>{{ selectedTutor?.streamName}}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item>
+          <v-list-item-content>
+            <v-list-item-title>Teaching Mode</v-list-item-title>
+            <v-list-item-subtitle>{{ selectedTutor?.teachingMode }}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item>
+          <v-list-item-content>
+            <v-list-item-title>email</v-list-item-title>
+            <v-list-item-subtitle>{{ selectedTutor?.email}}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item>
+          <v-list-item-content>
+            <v-list-item-title>phn_no</v-list-item-title>
+            <v-list-item-subtitle>{{ selectedTutor?.phn_no}}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="error" text @click="dialog=false">Cancel</v-btn>
+      <v-btn color="primary" @click="confirmBooking">Confirm</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
   </div>
 </template>
 <script>
@@ -221,6 +278,13 @@ export default {
   name: "UserAction",
   data() {
     return {
+      dialog: false,
+      selectedTutor: null,
+      streamId:null,
+      booking: {
+        name: "",
+        datetime: ""
+      },
       tutors: [],
       reviews: [
         {
@@ -243,27 +307,78 @@ export default {
     };
   },
   methods: {
+    
     async fetchTutors() {
-      try {
-        const response = await axios.get('http://localhost:8089/api/tutor/gettutor');
-        // Add placeholder fields like rating, image, experience, specialty for UI display
-        this.tutors = response.data.map(tutor => ({
-          id: tutor.tutor_id,
-          name: tutor.name,
-          email: tutor.email,
-          phone: tutor.phn_no,
-          subjectId: tutor.subjectId,
-          image: 'https://via.placeholder.com/100', // Placeholder image
-          rating: 4.5, // Static for now
-          experience: 3, // Static, replace with real if available
-          specialty: 'Subject Specialist' // Static or lookup using subjectId
-        }));
-      } catch (error) {
-        console.error('Failed to fetch tutors:', error);
-      }
-    },
+  try {
+    this.streamId = sessionStorage.getItem('streamId');
+    console.log("Fetching tutors for streamId:", this.streamId);
+    const response = await axios.get(`http://localhost:8089/api/tutor/getTutorbystream/${this.streamId}`);
+    
+    // Add placeholder fields like rating, image, experience, specialty for UI display
+    this.tutors = response.data.map(tutor => ({
+      id: tutor.tutorId, // make sure matches your backend field (was tutor.tutor_id)
+      name: tutor.name,
+      email: tutor.email,
+      phone: tutor.phn_no,
+      subjectId: tutor.subjectId,
+      streamId:tutor.streamId,
+      streamName:tutor.streamName,
+      subjectName: tutor.subjectName,
+      image: 'https://via.placeholder.com/100', // Placeholder image
+      rating: 4.5, // Static for now
+      experience: tutor.experience,
+      specialty: 'Subject Specialist' // You could dynamically map based on subjectName
+    }));
+  } catch (error) {
+    console.error('Failed to fetch tutors:', error);
+  }
+},
+
+async confirmBooking() {
+  try {
+    const userId = sessionStorage.getItem("userId");
+    const tutorId = this.selectedTutor.id;
+
+    // Step 1: Book tutor (status: pending)
+    const bookingRes = await axios.post("http://localhost:8089/api/bookings/create", {
+      userId,
+      tutorId,
+    });
+
+    const bookingId = bookingRes.data.bookingId;
+
+    // Step 2: Confirm booking and assign tutor to user
+    await axios.put(`http://localhost:8089/api/bookings/confirm/${bookingId}`);
+
+    alert("Tutor booked and confirmed successfully!");
+    this.dialog = false;
+  } catch (error) {
+    console.error("Booking error:", error);
+    alert("Something went wrong. Try again.");
+  }
+},
+
+
     goBack() {
       this.$router.go(-1);
+    },
+    openDialog(tutor) {
+      console.log(tutor);
+      
+      this.selectedTutor = tutor;
+      this.dialog = true;
+    },
+    bookSession() {
+      if (this.booking.name && this.booking.datetime) {
+        alert(
+          `Session booked with ${this.selectedTutor.name} on ${this.booking.datetime}`
+        );
+        this.dialog = false;
+        this.booking.name = "";
+        this.booking.datetime = "";
+      } else {
+        alert("Please enter all details.");
+      }
     },
     bookTutor(tutorId) {
       alert(`Booking tutor with ID: ${tutorId}`);

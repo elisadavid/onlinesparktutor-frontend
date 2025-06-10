@@ -21,6 +21,8 @@ const OnlineClass=()=>import('./components/OnlineClass.vue')
 const TutorAction=()=>import('./components/TutorAction.vue')
 const TutorRegister=()=> import('./components/TutorRegister.vue')
 const AdminDashboard=()=>import('./components/AdminDashboard.vue')
+const BookingSession=()=>import('./components/BookingSession.vue')
+const UserDashboard=()=>import('./components/UserDashboard.vue')
 // Define routes
 const routes = [
   {
@@ -109,6 +111,17 @@ const routes = [
     path:'/admindashboard',
     name:'AdminDashboard',
     component:AdminDashboard
+  },
+
+  {
+    path:'/bookingsession',
+    name:'BookingSession',
+    component:BookingSession
+  },
+  {
+    path:'/userdashboard',
+    name:'UserDashboard',
+    component:UserDashboard
   },
 
 

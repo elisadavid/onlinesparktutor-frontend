@@ -187,6 +187,7 @@ export default {
       qualificationId: "",
       location: "",
       teachingModeId: "",
+      qualification:'',
       subjectId: "",
       qualificationCertificate: null,
       genderOptions: [],
@@ -260,6 +261,7 @@ export default {
         qualificationId: this.qualificationId,
         location: this.location,
         teachingModeId: this.teachingModeId,
+        qualification:this.qualification
       };
       formData.append(
         "tutorModel",

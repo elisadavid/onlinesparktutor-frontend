@@ -110,10 +110,20 @@
         </div>
 
         <!-- Experience -->
-        <div class="experience-section">
-          <label for="experience">Experience</label>
-          <input type="text" id="experience" v-model="experience" required>
-        </div>
+         <div class="row mb-3">
+  <!-- Location Column -->
+  <div class="col-md-6">
+    <label class="form-label">Location</label>
+    <input type="text" class="form-control" v-model="location" required />
+  </div>
+
+  <!-- Experience Column -->
+  <div class="col-md-6">
+    <label for="experience" class="form-label">Experience</label>
+    <input type="text" class="form-control" id="experience" v-model="experience" required />
+  </div>
+</div>
+
 
         <!-- Submit Button -->
         <button type="submit" class="submit-button">Complete Registration</button>
@@ -197,7 +207,8 @@ export default {
           experience: this.experience,
           subjectName:this.subjectName,
           streamName:this.streamName,
-          rating:this.rating
+          rating:this.rating,
+          qualification: this.qualification
         }
 
         const response = await fetch('http://localhost:8089/api/tutor/add/availability', {

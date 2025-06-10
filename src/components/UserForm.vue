@@ -241,7 +241,7 @@ export default {
         if (res) {
           this.text = 'Successfully logged in';
           this.snackbar = true;
-          this.$router.push('/useraction');
+          this.$router.push('/userdashboard');
         } else {
           this.text = 'Login failed';
           this.snackbar = true;
