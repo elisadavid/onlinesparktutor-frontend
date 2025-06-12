@@ -124,7 +124,9 @@
                 <td>{{ user.username }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.phn_no }}</td>
-                <td><span class="mode-badge">{{ user.teachingMode }}</span></td>
+                <td>
+                  <span class="mode-badge">{{ getTeachingMode(user.teachingModeId) }}</span>
+                </td>
                 <td class="actions">
                   <button class="btn-view" @click="viewUser(user.userId)">view<i class="fas fa-eye"></i></button>
                   <v-btn color="primary" @click="openDialog(user.userId)">Notify User</v-btn>
@@ -416,6 +418,11 @@ export default {
       } catch (error) {
         console.error('Error fetching courses:', error);
       }
+    },
+    getTeachingMode(id) {
+      if (id === 1) return 'Online'
+      if (id === 2) return 'Offline'
+      return 'Unknown'
     },
 
     async fetchSchedules() {

@@ -141,7 +141,7 @@
                 <td class="actions-cell">
                   <!-- <button class="action-btn view"><i class="fas fa-eye"></i></button>
                   <button class="action-btn edit"><i class="fas fa-edit"></i></button> -->
-                 <button @click="deleteEntity(student.user_id)">Delete</button>
+                 <button @click="deleteUser(student.userId)">Delete</button>
                  
                 </td>
               </tr>
@@ -399,7 +399,7 @@ export default {
 
 
 
- async delete(userId) {
+ async deleteUser(userId) {
   const confirmed = confirm(`Are you sure you want to delete ?`);
   if (!confirmed) return;
 
@@ -408,7 +408,7 @@ export default {
       method: 'DELETE'
     });
 
-    if (response.ok) {
+    if (response) {
       alert('User deleted successfully.');
       this.fetchDashboardData(); // Refresh list
     } else {

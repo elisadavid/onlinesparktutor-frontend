@@ -98,7 +98,7 @@
           <v-card-title class="text-h6 font-weight-bold">Edit Profile</v-card-title>
           <v-card-text>
             <v-form ref="editFormRef" lazy-validation>
-              <v-text-field v-model="editForm.name" label="Name" required />
+              <v-text-field v-model="editForm.username" label="Name" required />
               <v-text-field v-model="editForm.email" label="Email" required />
               <v-text-field v-model="editForm.phn_no" label="Phone Number" required />
               <v-text-field v-model="editForm.location" label="Location" />
@@ -282,7 +282,7 @@ export default {
 
       editDialog: false,
       editForm: {
-        name: '',
+        username: '',
         email: '',
         phn_no: '',
         location: ''
@@ -367,7 +367,7 @@ export default {
       try {
         const userId = this.getuserId
         if (!userId) return alert('User not logged in')
-        const res = await axios.put(`http://localhost:8089/api/User/update/${userId}`, this.editForm)
+        const res = await axios.put(`http://localhost:8089/api/User/update/profile/${userId}`, this.editForm)
         if (res.status >= 200 && res.status < 300) {
           this.userProfile = { ...this.userProfile, ...this.editForm }
           alert('Profile updated successfully!')
@@ -506,6 +506,480 @@ export default {
   }
 }
 </script>
+
+
+<style scoped>
+h3 {
+  margin-bottom: 1rem;
+}
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 250px;
+  background: linear-gradient(to bottom, #2c3e50, #3498db);
+  color: white;
+  padding: 1.5rem 0;
+  position: fixed;
+  height: 100vh;
+}
+
+.sidebar-header {
+  padding: 0 1.5rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.sidebar-nav li {
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar-nav li i {
+  margin-right: 0.75rem;
+  width: 20px;
+}
+
+.sidebar-nav li:hover,
+.sidebar-nav li.active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+.edit-btn {
+  margin: 20px 0;
+  padding: 10px 20px;
+  background-color: #3f51b5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Main Content Styles */
+.main-content {
+  flex: 1;
+  margin-left: 250px;
+  padding: 2rem;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.content-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #2c3e50;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logout-btn {
+  padding: 0.5rem 1rem;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Profile Styles */
+.profile-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.profile-header {
+  background: linear-gradient(to right, #2c3e50, #3498db);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-details {
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.detail-item i {
+  color: #3498db;
+  font-size: 1.2rem;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-content label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+/* Courses Styles */
+.courses-grid,
+.tutors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.course-card,
+.tutor-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.course-card:hover,
+.tutor-card:hover {
+  transform: translateY(-5px);
+}
+
+.course-header,
+.tutor-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.course-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.course-status.active {
+  background: #e3fcef;
+  color: #00875a;
+}
+
+.course-status.upcoming {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.course-content,
+.tutor-content {
+  padding: 1.5rem;
+}
+
+.course-content p,
+.tutor-content p {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+  color: #6c757d;
+}
+
+.course-actions,
+.tutor-actions {
+  padding: 1.5rem;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-view,
+.btn-contact {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-view {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-view:hover {
+  background-color: #2980b9;
+}
+
+.btn-contact {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.btn-contact:hover {
+  background-color: #27ae60;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 0;
+    transform: translateX(-100%);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .profile-details,
+  .courses-grid,
+  .tutors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .content-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+.tutors-section {
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-badge {
+  background: linear-gradient(45deg, #3498db, #2ecc71);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  margin: 0;
+}
+
+.tutors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.tutor-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tutor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tutor-header {
+  position: relative;
+  padding: 1.5rem;
+  text-align: center;
+  background: linear-gradient(45deg, #3498db, #2ecc71);
+}
+
+.tutor-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid white;
+  object-fit: cover;
+  margin: 0 auto;
+}
+
+.tutor-rating {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tutor-rating i {
+  color: #f1c40f;
+}
+
+.tutor-info {
+  padding: 1.5rem;
+}
+
+.tutor-name {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.tutor-specialty {
+  color: #7f8c8d;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.tutor-details {
+  margin-top: 1rem;
+}
+
+.tutor-details p {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  color: #34495e;
+}
+
+.tutor-details i {
+  color: #3498db;
+  width: 20px;
+}
+
+.book-button {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(45deg, #3498db, #2ecc71);
+  color: white;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.book-button:hover {
+  opacity: 0.9;
+}
+
+.book-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.book-button:disabled:hover {
+  opacity: 0.7;
+}
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  color: #555;
+}
+
+.tutor-name {
+  font-weight: 600;
+  color: #3f51b5;
+}
+
+.timestamp {
+  font-style: italic;
+  color: #888;
+}
+
+.notification-message {
+  font-size: 1.05rem;
+  color: #333;
+  font-weight: 500;
+  padding-left: 2px;
+}
+
+
+
+@media (max-width: 768px) {
+  .tutors-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+}
+</style>
 
 
 
